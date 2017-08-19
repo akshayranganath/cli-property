@@ -45,7 +45,7 @@ let targetProperty;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 function activateProperty(property, targetProperty, options) {
-    
+
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
@@ -56,19 +56,19 @@ function activateProperty(property, targetProperty, options) {
                 options.ver = data.propertyVersion;
             }
             if ("BOTH" === env || env.startsWith("STAG"))
-                return property.activate(   targetProperty, 
-                                            options.ver, 
+                return property.activate(   targetProperty,
+                                            options.ver,
                                             WebSite.AKAMAI_ENV.STAGING,
-                                            "Updated Automatically to staging.", 
+                                            "Updated Automatically to staging.",
                                             options.email);
             return Promise.resolve(data);
         })
         .then(data => {
             if ("BOTH" === env || env.startsWith("PROD"))
-                return property.activate(   targetProperty, 
-                                            options.ver, 
+                return property.activate(   targetProperty,
+                                            options.ver,
                                             WebSite.AKAMAI_ENV.PRODUCTION,
-                                            "Updated Automatically to prod.", 
+                                            "Updated Automatically to prod.",
                                             options.email);
             return Promise.resolve(data);
         });
@@ -76,22 +76,22 @@ function activateProperty(property, targetProperty, options) {
 
 function deactivateProperty(property, targetProperty, options) {
     section = options.section || section;
-    
+
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
             if ("BOTH" === env || env.startsWith("STAG"))
-               return property.deactivate(  targetProperty, 
+               return property.deactivate(  targetProperty,
                                             WebSite.AKAMAI_ENV.STAGING,
-                                            "Automatically deactivating on staging.", 
+                                            "Automatically deactivating on staging.",
                                             options.email);
             return Promise.resolve();
         })
         .then(() => {
             if ("BOTH" === env || env.startsWith("PROD"))
-                return property.deactivate( targetProperty, 
+                return property.deactivate( targetProperty,
                                             WebSite.AKAMAI_ENV.PRODUCTION,
-                                            "Automatically deactivating on prod.", 
+                                            "Automatically deactivating on prod.",
                                             options.email);
             return Promise.resolve(data);
         });
@@ -100,15 +100,15 @@ function deactivateProperty(property, targetProperty, options) {
 
 function updateProperty(property, targetProperty, options) {
     section = options.section || section;
- 
+
     if (options.file)
-        return property.updateFromFile( targetProperty, 
-                                        options.file, 
+        return property.updateFromFile( targetProperty,
+                                        options.file,
                                         options.origin);
-    
+
     if (options.srcprop)
-        return property.copy(   options.srcprop, 
-                                options.srcver, 
+        return property.copy(   options.srcprop,
+                                options.srcver,
                                 targetProperty);
     return Promise.resolve();
 }
@@ -128,10 +128,10 @@ function createProperty(property, targetProperty, options) {
     }
     if (!options.clone) {
         if (options.file) {
-          return property.createFromFile(hostnames, 
+          return property.createFromFile(hostnames,
                                         options.file,
                                         targetProperty,
-                                        options.contract, 
+                                        options.contract,
                                         options.group,
                                         options.cpcode,
                                         options.origin,
@@ -139,10 +139,10 @@ function createProperty(property, targetProperty, options) {
                                         options.ruleformat);
 
         } else {
-            return property.create(hostnames, 
+            return property.create(hostnames,
                                         options.cpcode,
                                         targetProperty,
-                                        options.contract, 
+                                        options.contract,
                                         options.group,
                                         null,
                                         options.origin,
@@ -150,12 +150,12 @@ function createProperty(property, targetProperty, options) {
                                         options.ruleformat)
         }
     } else {
-        return property.createFromExisting(options.clone, 
-                                        options.srcver, 
+        return property.createFromExisting(options.clone,
+                                        options.srcver,
                                         options.nocopy,
                                         hostnames,
-                                        targetProperty, 
-                                        options.contract, 
+                                        targetProperty,
+                                        options.contract,
                                         options.group,
                                         options.origin,
                                         options.edgehostname,
@@ -167,15 +167,15 @@ function createProperty(property, targetProperty, options) {
 
 function retrieveProperty(property, targetProperty, options) {
     if (options.file) {
-        return property.retrieveToFile( targetProperty, 
-                                        options.file, 
+        return property.retrieveToFile( targetProperty,
+                                        options.file,
                                         options.propver);
     } else if (options.format) {
         return property.retrievePropertyRuleFormat(targetProperty, options.propver)
     } else if (options.variables) {
         return property.getVariables(targetProperty, options.propver, options.file)
     } else {
-        return property.retrieve(targetProperty, 
+        return property.retrieve(targetProperty,
                                 options.propver,
                                 false)
         .then(data => {
@@ -199,12 +199,17 @@ function retrieveFormats(property, options) {
     })
 }
 
-function retrieveHostnames(property) {
-    return property.retrieve(targetProperty, 0, true)
-    .then(data => {
-        console.log(JSON.stringify(data.hostnames.items, '', 2));
-    })
+function retrieveHostnames(property, targetProperty, options) {
+    if (options.file) {
+        return property.retrieveToFile( targetProperty,
+                                        options.file,
+                                        options.propver,
+                                        true);
+    } else {
+        property.retrieve(targetProperty, 0, true)
+    }
 }
+
 
 function modifyProperty(property, targetProperty, options, command) {
     let version = options.propver ? options.propver : 0;
@@ -250,7 +255,7 @@ function modifyProperty(property, targetProperty, options, command) {
             } else {
              return Promise.resolve();
             }
-    }) 
+    })
     .then(() => {
         if (options.move) {
             return property.moveProperty(targetProperty, options.move)
@@ -268,8 +273,8 @@ function modifyProperty(property, targetProperty, options, command) {
     .then(() => {
         if (options.sureroutemap || options.surerouteto || options.sureroutetohost) {
             return property.setSureRoute(targetProperty,
-                                            version, 
-                                            options.sureroutemap, 
+                                            version,
+                                            options.sureroutemap,
                                             options.surerouteto,
                                             options.sureroutetohost);
         } else {
@@ -282,7 +287,7 @@ function numberVersion(version) {
     if (version == null) {
         return 0;
     }
-    
+
     let versionstring = version.toString();
     let returnstring;
 
@@ -313,7 +318,7 @@ function main()
              process.argv.push("--help")
              program.parse(process.argv)
          })
-        
+
      program
         .command('activate <property>')
 	.option("--debug", "Turns on debugging output")
@@ -333,10 +338,10 @@ function main()
             console.log('Activating %s on %s', targetProperty, options.network)
 
             let env = options.network.toUpperCase();
-            if ("BOTH" != env && 
-                !env.startsWith("STAG") && 
+            if ("BOTH" != env &&
+                !env.startsWith("STAG") &&
                 !env.startsWith("PROD"))
-            program.help(); 
+            program.help();
 
         })
 
@@ -361,13 +366,13 @@ function main()
             targetProperty = target;
             options = opts;
             command = "create";
-            
+
             if (!targetProperty)
                 program.help();
 
             console.log('Creating new property %s', targetProperty);
 
-            if ((options.group || options.contract) && (!(options.group && options.contract))) 
+            if ((options.group || options.contract) && (!(options.group && options.contract)))
                 program.help()
         })
 
@@ -388,8 +393,8 @@ function main()
             }
            console.log('Deactivating %s on %s', targetProperty, options.network)
             let env = options.network.toUpperCase();
-            if ("BOTH" != env && 
-                !env.startsWith("STAG") && 
+            if ("BOTH" != env &&
+                !env.startsWith("STAG") &&
                 !env.startsWith("PROD"))
             program.help();
         })
@@ -412,7 +417,7 @@ function main()
             targetProperty = target;
             options = opts;
             command = "delete";
-            
+
             console.log('Deleting %s', targetProperty)
         })
 
@@ -429,7 +434,7 @@ function main()
             targetProperty = target;
             options = opts;
             command="retrieve";
-            
+
             console.log('Retrieving %s', targetProperty)
         })
     program
@@ -463,7 +468,7 @@ function main()
         .option("--sureroutetohost <host>", "Host for SureRoute test object")
         .option("--notes <notes>", "Version notes for this property version")
         .option("--variables <file>", "User variables file.  Format should be\n" +
-                "\t\t\t\t   [{\n" + 
+                "\t\t\t\t   [{\n" +
         '\t\t\t\t\t"name": "PMUSER_TEST",' + "\n" +
         '\t\t\t\t\t"value": "Foobar",' +"\n" +
         '\t\t\t\t\t"description": "This is my test variable",' +"\n" +
@@ -478,7 +483,7 @@ function main()
             targetProperty = target;
             options = opts;
             command = "modify";
- 
+
             console.log('Modifying property %s', targetProperty);
         })
 
@@ -497,7 +502,7 @@ function main()
         section = options.section || section;
 	debug = options.debug || debug;
         property = new WebSite({path:"~/.edgerc", section: section, debug: debug});
-    
+
         if (options.propver) {
             options.propver = numberVersion(options.propver)
         }
@@ -507,7 +512,7 @@ function main()
     } else {
         property = new WebSite({path:"~/.edgerc", section: section});
     }
-    
+
     Promise.resolve()
             .then(() => {
                 switch(command) {
@@ -568,12 +573,12 @@ function main()
                             var end=Date.now();
                             var timeSpent=(end-begin)/1000/60 +" mins";
                             console.log("Modify: " + timeSpent)
-                        })                                                    
+                        })
 
                         break;
                     case "retrieve":
                         if (options.hostnames) {
-                            return retrieveHostnames(property, targetProperty)
+                            return retrieveHostnames(property, targetProperty, options)
                         } else {
                             return retrieveProperty(property, targetProperty, options)
                         }
